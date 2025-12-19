@@ -14,20 +14,16 @@ A personalized anime and manga recommendation app powered by MyAnimeList.
 
 ## Tech Stack
 
-- React + Vite
-- Supabase
+- React 19 + Vite
+- Supabase (Database + Edge Functions)
 - MyAnimeList API v2
 
-## Deploy on Vercel
+## Setup
 
-1. Fork this repository
-2. Import the project in [Vercel](https://vercel.com)
-3. Add environment variables:
-   - `VITE_MAL_CLIENT_ID`
-   - `VITE_MAL_CLIENT_SECRET`
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-4. Deploy!
+### Prerequisites
+- Node.js 18+
+- Supabase project
+- MyAnimeList API credentials
 
 ## License
 

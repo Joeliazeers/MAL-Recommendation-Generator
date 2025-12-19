@@ -693,6 +693,47 @@ select.input {
   background: var(--color-error);
 }
 
+/* Inline Add to List Button (beside status badge) */
+.add-to-list-btn-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.add-to-list-btn-inline:hover {
+  background: var(--color-accent);
+  transform: scale(1.15);
+}
+
+.add-to-list-btn-inline:hover svg {
+  stroke: var(--color-bg-primary);
+  transform: scale(1.2);
+}
+
+.add-to-list-btn-inline.loading {
+  background: var(--color-accent);
+  color: white;
+}
+
+.add-to-list-btn-inline.success {
+  background: var(--color-success);
+  color: white;
+}
+
+.add-to-list-btn-inline.error {
+  background: var(--color-error);
+  color: white;
+}
+
 .rec-image {
   width: 100%;
   aspect-ratio: 2/3;

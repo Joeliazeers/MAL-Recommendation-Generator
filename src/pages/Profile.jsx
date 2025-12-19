@@ -1,13 +1,24 @@
+import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 
 const Profile = () => {
-  const { user, logout } = useAuth()
+  const { user, logout, refreshUserData, loading } = useAuth()
   const navigate = useNavigate()
+  const [syncing, setSyncing] = useState(false)
 
   const handleLogout = () => {
     logout()
     navigate('/')
+  }
+
+  const handleSync = async () => {
+    setSyncing(true)
+    try {
+      await refreshUserData()
+    } finally {
+      setSyncing(false)
+    }
   }
 
   if (!user) {
@@ -48,21 +59,43 @@ const Profile = () => {
     <div className="container">
       <section className="section">
         {/* Profile Header */}
-        <div className="card profile-header">
-          <img 
-            src={user.picture || '/default-avatar.png'} 
-            alt={user.name}
-            className="profile-avatar"
-          />
-          <div className="profile-info">
-            <h2 style={{ marginBottom: '0.5rem', fontSize: '1.5rem' }}>{user.name}</h2>
-            <p style={{ color: 'var(--color-text-secondary)', margin: '0.25rem 0' }}>
-              Gender: {formatGender(user.gender)}
-            </p>
-            <p style={{ color: 'var(--color-text-secondary)', margin: '0.25rem 0' }}>
-              Joined: {formatDate(user.joined_at)}
-            </p>
+        <div className="card profile-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <img 
+              src={user.picture || '/default-avatar.png'} 
+              alt={user.name}
+              className="profile-avatar"
+            />
+            <div className="profile-info">
+              <h2 style={{ marginBottom: '0.5rem', fontSize: '1.5rem' }}>{user.name}</h2>
+              <p style={{ color: 'var(--color-text-secondary)', margin: '0.25rem 0' }}>
+                Gender: {formatGender(user.gender)}
+              </p>
+              <p style={{ color: 'var(--color-text-secondary)', margin: '0.25rem 0' }}>
+                Joined: {formatDate(user.joined_at)}
+              </p>
+            </div>
           </div>
+          <button 
+            onClick={handleSync} 
+            className="btn btn-primary"
+            disabled={syncing || loading}
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            {syncing ? (
+              <>
+                <span className="spinner" style={{ width: 16, height: 16, marginRight: '0.5rem' }}></span>
+                Syncing...
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '0.5rem' }}>
+                  <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+                </svg>
+                Sync with MAL
+              </>
+            )}
+          </button>
         </div>
 
         {/* Anime Stats */}
@@ -121,22 +154,6 @@ const Profile = () => {
             <div className="stat-value">{mangaStats.mean_score?.toFixed(1) || '—'}</div>
             <div className="stat-label">Mean Score</div>
           </div>
-        </div>
-
-        {/* Actions */}
-        <div className="divider"></div>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <a 
-            href={`https://myanimelist.net/profile/${user.name}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary"
-          >
-            View on MAL
-          </a>
-          <button onClick={handleLogout} className="btn btn-secondary">
-            Sign Out
-          </button>
         </div>
       </section>
     </div>

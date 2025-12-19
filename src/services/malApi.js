@@ -1,11 +1,14 @@
 // Use proxy paths to bypass CORS during development
 const MAL_API_URL = '/api/mal/v2'
 const MAL_AUTH_URL = 'https://myanimelist.net/v1/oauth2' // Keep this for auth redirect
-const MAL_TOKEN_URL = '/api/mal/oauth2'
 
+// Client ID is safe to expose (used for auth redirect and public API requests)
 const CLIENT_ID = import.meta.env.VITE_MAL_CLIENT_ID
-const CLIENT_SECRET = import.meta.env.VITE_MAL_CLIENT_SECRET
 const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI
+
+// Supabase Edge Function URL for secure token exchange
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/mal-oauth`
 
 // PKCE Helper Functions
 const generateRandomString = (length) => {
@@ -54,26 +57,23 @@ export const exchangeCodeForToken = async (code) => {
     throw new Error('Code verifier not found')
   }
   
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET,
-    grant_type: 'authorization_code',
-    code: code,
-    redirect_uri: REDIRECT_URI,
-    code_verifier: codeVerifier
-  })
-  
-  const response = await fetch(`${MAL_TOKEN_URL}/token`, {
+  // Use Edge Function to exchange code for token (hides client secret)
+  const response = await fetch(EDGE_FUNCTION_URL, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/json',
     },
-    body: params.toString()
+    body: JSON.stringify({
+      code,
+      code_verifier: codeVerifier,
+      redirect_uri: REDIRECT_URI,
+      grant_type: 'authorization_code'
+    })
   })
   
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Failed to exchange code for token')
+    const error = await response.json().catch(() => ({}))
+    throw new Error(error.error || 'Failed to exchange code for token')
   }
   
   // Clear code verifier after successful exchange
@@ -89,19 +89,16 @@ export const exchangeCodeForToken = async (code) => {
 }
 
 export const refreshAccessToken = async (refreshToken) => {
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET,
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken
-  })
-  
-  const response = await fetch(`${MAL_TOKEN_URL}/token`, {
+  // Use Edge Function to refresh token (hides client secret)
+  const response = await fetch(EDGE_FUNCTION_URL, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/json',
     },
-    body: params.toString()
+    body: JSON.stringify({
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token'
+    })
   })
   
   if (!response.ok) {
@@ -116,6 +113,7 @@ export const refreshAccessToken = async (refreshToken) => {
     token_expires_at: new Date(Date.now() + data.expires_in * 1000).toISOString()
   }
 }
+
 
 // API Helper
 const apiRequest = async (endpoint, accessToken, params = {}) => {

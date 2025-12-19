@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import RecommendationCard from './RecommendationCard'
 import AnimeDetailModal from './AnimeDetailModal'
+import { useAuth } from '../../context/AuthContext'
+import { getUserAnimeListCache, getUserMangaListCache } from '../../services/supabase'
 
 const RecommendationList = ({ 
   recommendations, 
@@ -10,8 +12,30 @@ const RecommendationList = ({
   type, 
   mode 
 }) => {
+  const { user } = useAuth()
   const [selectedAnime, setSelectedAnime] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [userListIds, setUserListIds] = useState(new Set())
+
+  // Fetch user's list to check which items are already added
+  useEffect(() => {
+    const fetchUserList = async () => {
+      if (!user?.id) return
+      try {
+        const list = type === 'manga' 
+          ? await getUserMangaListCache(user.id)
+          : await getUserAnimeListCache(user.id)
+        
+        const ids = new Set(list.map(item => 
+          type === 'manga' ? item.mal_manga_id : item.mal_anime_id
+        ))
+        setUserListIds(ids)
+      } catch (err) {
+        console.error('Failed to fetch user list:', err)
+      }
+    }
+    fetchUserList()
+  }, [user?.id, type])
 
   const handleCardClick = (anime) => {
     setSelectedAnime(anime)
@@ -99,6 +123,7 @@ const RecommendationList = ({
             item={{ node: item }}
             type={type}
             onClick={handleCardClick}
+            isInUserList={userListIds.has(item.id)}
           />
         ))}
       </div>
@@ -114,3 +139,4 @@ const RecommendationList = ({
 }
 
 export default RecommendationList
+
