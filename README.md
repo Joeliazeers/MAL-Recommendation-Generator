@@ -10,7 +10,7 @@ A personalized anime and manga recommendation app powered by MyAnimeList.
 - **Genre Filtering** - Filter recommendations by multiple genres
 - **Quick Add to List** - Add recommendations directly to your MAL "Plan to Watch/Read" list
 - **Share Recommendations** - Generate shareable links for friends
-- **Daily Cooldown** - New recommendations available at midnight
+- **Daily Cooldown** - New recommendations available at 00:00 AM
 
 ## Tech Stack
 
