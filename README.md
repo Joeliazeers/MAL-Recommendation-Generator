@@ -8,7 +8,7 @@ A personalized anime and manga recommendation app powered by MyAnimeList.
 - **Discover New Titles** - Find highly-rated series from random seasons you haven't watched
 - **Rewatch/Reread** - Rediscover your highest-rated titles worth experiencing again
 - **Genre Filtering** - Filter recommendations by multiple genres
-- **Quick Add to List** - Add recommendations directly to your MAL "Plan to Watch/Read" list
+- **Quick Add to List** - Add recommendations directly to your MAL "Plan to Watch/Read" lists
 - **Share Recommendations** - Generate shareable links for friends
 - **Daily Cooldown** - New recommendations available at 00:00 AM
 
