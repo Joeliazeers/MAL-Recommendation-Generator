@@ -1,12 +1,10 @@
-// Use proxy paths to bypass CORS during development
 const MAL_API_URL = '/api/mal/v2'
-const MAL_AUTH_URL = 'https://myanimelist.net/v1/oauth2' // Keep this for auth redirect
+const MAL_AUTH_URL = 'https://myanimelist.net/v1/oauth2' 
 
-// Client ID is safe to expose (used for auth redirect and public API requests)
 const CLIENT_ID = import.meta.env.VITE_MAL_CLIENT_ID
 const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI
 
-// Supabase Edge Function URL for secure token exchange
+// Supabase Edge Function 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/mal-oauth`
 
@@ -20,13 +18,11 @@ const generateRandomString = (length) => {
   return result
 }
 
-// MAL uses plain challenge method (code_verifier === code_challenge)
 export const generateCodeVerifier = () => {
   return generateRandomString(128)
 }
 
 export const generateCodeChallenge = (codeVerifier) => {
-  // MAL uses 'plain' method, so challenge equals verifier
   return codeVerifier
 }
 
@@ -34,8 +30,7 @@ export const generateCodeChallenge = (codeVerifier) => {
 export const getAuthUrl = () => {
   const codeVerifier = generateCodeVerifier()
   const codeChallenge = generateCodeChallenge(codeVerifier)
-  
-  // Store code verifier in localStorage for callback (persists across redirects)
+
   localStorage.setItem('mal_code_verifier', codeVerifier)
   
   const params = new URLSearchParams({
@@ -57,7 +52,6 @@ export const exchangeCodeForToken = async (code) => {
     throw new Error('Code verifier not found')
   }
   
-  // Use Edge Function to exchange code for token (hides client secret)
   const response = await fetch(EDGE_FUNCTION_URL, {
     method: 'POST',
     headers: {
@@ -76,7 +70,6 @@ export const exchangeCodeForToken = async (code) => {
     throw new Error(error.error || 'Failed to exchange code for token')
   }
   
-  // Clear code verifier after successful exchange
   localStorage.removeItem('mal_code_verifier')
   
   const data = await response.json()
@@ -89,7 +82,6 @@ export const exchangeCodeForToken = async (code) => {
 }
 
 export const refreshAccessToken = async (refreshToken) => {
-  // Use Edge Function to refresh token (hides client secret)
   const response = await fetch(EDGE_FUNCTION_URL, {
     method: 'POST',
     headers: {
@@ -117,7 +109,6 @@ export const refreshAccessToken = async (refreshToken) => {
 
 // API Helper
 const apiRequest = async (endpoint, accessToken, params = {}) => {
-  // Build URL with query params (works with relative paths for proxy)
   const queryString = new URLSearchParams()
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
@@ -207,7 +198,7 @@ export const searchAnime = async (accessToken, query, limit = 100) => {
   return data.data || []
 }
 
-// Get detailed anime info for modal
+// Anime Detail Info
 export const getAnimeDetails = async (accessToken, animeId) => {
   const data = await apiRequest(`/anime/${animeId}`, accessToken, {
     fields: 'id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_episodes,start_season,broadcast,source,average_episode_duration,rating,studios,genres,media_type,status'
@@ -215,7 +206,7 @@ export const getAnimeDetails = async (accessToken, animeId) => {
   return data
 }
 
-// Get detailed manga info for modal
+// Manga Detail Info
 export const getMangaDetails = async (accessToken, mangaId) => {
   const data = await apiRequest(`/manga/${mangaId}`, accessToken, {
     fields: 'id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_chapters,num_volumes,authors,genres,media_type,status'
@@ -223,7 +214,7 @@ export const getMangaDetails = async (accessToken, mangaId) => {
   return data
 }
 
-// Add anime to user's list (Plan to Watch, Watching, etc.)
+// Add anime to user's list
 export const addAnimeToList = async (accessToken, animeId, status = 'plan_to_watch') => {
   const url = `${MAL_API_URL}/anime/${animeId}/my_list_status`
   
@@ -244,7 +235,7 @@ export const addAnimeToList = async (accessToken, animeId, status = 'plan_to_wat
   return response.json()
 }
 
-// Add manga to user's list (Plan to Read, Reading, etc.)
+// Add manga to user's list
 export const addMangaToList = async (accessToken, mangaId, status = 'plan_to_read') => {
   const url = `${MAL_API_URL}/manga/${mangaId}/my_list_status`
   
