@@ -17,7 +17,6 @@ const RecommendationList = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [userListIds, setUserListIds] = useState(new Set())
 
-  // Fetch user's list to check which items are already added
   useEffect(() => {
     const fetchUserList = async () => {
       if (!user?.id) return
