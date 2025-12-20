@@ -16,7 +16,7 @@ const Recommendations = () => {
   const [genreFilter, setGenreFilter] = useState([])
   const [hasGenerated, setHasGenerated] = useState(false)
   const [countdown, setCountdown] = useState(null)
-  const [shareStatus, setShareStatus] = useState(null) // null, 'loading', 'copied'
+  const [shareStatus, setShareStatus] = useState(null) 
 
   const {
     recommendations,
@@ -33,7 +33,6 @@ const Recommendations = () => {
     loadCachedRecommendations
   } = useRecommendations()
 
-  // Load cached recommendations on initial mount and when URL params change
   useEffect(() => {
     const { hasCached } = loadCachedRecommendations(type, mode)
     setHasGenerated(hasCached)
@@ -48,7 +47,6 @@ const Recommendations = () => {
       const formatted = formatCountdown(ms)
       setCountdown(formatted)
       
-      // If past midnight, reset
       if (!formatted) {
         setHasGenerated(false)
         clearRecommendations()
@@ -61,7 +59,6 @@ const Recommendations = () => {
     return () => clearInterval(interval)
   }, [hasGenerated, hasGeneratedToday, getTimeUntilMidnight, formatCountdown, clearRecommendations])
 
-  // Tab handlers - just update URL params, useEffect will handle cache loading
   const setType = (newType) => {
     setSearchParams({ type: newType, mode })
   }
@@ -89,7 +86,6 @@ const Recommendations = () => {
     
     setShareStatus('loading')
     try {
-      // Prepare simplified recommendation data
       const recsToShare = recommendations.map(item => {
         const node = item.node || item
         return {
@@ -118,8 +114,6 @@ const Recommendations = () => {
   }
 
   const genres = type === 'anime' ? ANIME_GENRES : MANGA_GENRES
-
-  // Check if button should be hidden (after generating)
   const showButton = !hasGenerated && !hasGeneratedToday && !cooldownRemaining
   const showCountdown = hasGenerated || hasGeneratedToday || cooldownRemaining
 
@@ -157,7 +151,7 @@ const Recommendations = () => {
             </button>
           </div>
 
-          {/* Genre Filter - only show before generating */}
+          {/* Genre Filter */}
           {mode === 'new' && showButton && (
             <div style={{ maxWidth: '300px', margin: '0 auto', width: '100%' }}>
               <GenreFilter 
@@ -168,7 +162,7 @@ const Recommendations = () => {
             </div>
           )}
 
-          {/* Generate Button - only show if not on cooldown */}
+          {/* Generate Button */}
           {showButton && (
             <div style={{ textAlign: 'center' }}>
               <button 
@@ -194,7 +188,7 @@ const Recommendations = () => {
             </div>
           )}
 
-          {/* Countdown Timer - show after generating */}
+          {/* Countdown Timer */}
           {showCountdown && countdown && (
             <div style={{ textAlign: 'center' }}>
               <div className="card" style={{ 
@@ -232,7 +226,7 @@ const Recommendations = () => {
               mode={mode}
             />
             
-            {/* Share Button - below cards */}
+            {/* Share Button */}
             {recommendations.length > 0 && !loading && (
               <div style={{ textAlign: 'center', marginTop: '2rem' }}>
                 <button 
