@@ -11,10 +11,10 @@ import {
   getUserMangaListCache 
 } from '../services/supabase'
 
-// Debug flag - set to true to disable cooldown during development
+// Debugging
 const DEBUG_MODE = false
 
-// Helper to shuffle array (Fisher-Yates)
+// Randomize anime and manga
 const shuffleArray = (array) => {
   const shuffled = [...array]
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -24,20 +24,18 @@ const shuffleArray = (array) => {
   return shuffled
 }
 
-// Get next midnight (00:00 AM) in local time
+// Time reset
 const getNextMidnight = () => {
   const now = new Date()
   const midnight = new Date(now)
-  midnight.setHours(24, 0, 0, 0) // Next midnight
+  midnight.setHours(24, 0, 0, 0)
   return midnight
 }
 
-// Calculate time remaining until midnight in ms
+// Calculate remaining time
 const getTimeUntilMidnight = () => {
   return getNextMidnight().getTime() - Date.now()
 }
-
-// Format milliseconds to HH:MM:SS
 const formatCountdown = (ms) => {
   if (ms <= 0) return null
   
@@ -62,7 +60,6 @@ export const useRecommendations = () => {
   const [cooldownRemaining, setCooldownRemaining] = useState(null)
   const [hasGeneratedToday, setHasGeneratedToday] = useState(false)
 
-  // Check and load cached recommendations on mount
   const checkCooldown = useCallback((type, mode) => {
     if (!user || DEBUG_MODE) return { canGenerate: true, cached: null }
     
@@ -76,13 +73,10 @@ export const useRecommendations = () => {
     const now = new Date()
     
     if (now >= cooldownTime) {
-      // Cooldown expired (past midnight)
       localStorage.removeItem(cooldownKey)
       localStorage.removeItem(recsKey)
       return { canGenerate: true, cached: null }
     }
-    
-    // Still in cooldown - load cached recommendations
     const cachedRecs = localStorage.getItem(recsKey)
     return { 
       canGenerate: false, 
@@ -91,7 +85,6 @@ export const useRecommendations = () => {
     }
   }, [user])
 
-  // Save recommendations and set cooldown until midnight
   const saveCooldown = useCallback((type, mode, recs) => {
     if (!user || DEBUG_MODE) return
     
@@ -122,12 +115,10 @@ export const useRecommendations = () => {
     setCooldownRemaining(null)
     
     try {
-      // Get user's existing list from cache
       const userList = type === 'anime' 
         ? await getUserAnimeListCache(user.id)
         : await getUserMangaListCache(user.id)
       
-      // Create set of anime IDs user has watched/completed/plan to watch
       const userListIds = new Set(
         userList.map(item => 
           type === 'anime' ? item.mal_anime_id : item.mal_manga_id
@@ -137,12 +128,9 @@ export const useRecommendations = () => {
       let candidates = []
       
       if (type === 'anime') {
-        // CUSTOM RECOMMENDATION SYSTEM
-        // Fetch seasonal anime from random years to build diverse pool
         const currentYear = new Date().getFullYear()
         const seasons = ['winter', 'spring', 'summer', 'fall']
         
-        // Pick 4 random year/season combinations from 2010 to current year
         const randomSeasons = []
         for (let i = 0; i < 4; i++) {
           const randomYear = Math.floor(Math.random() * (currentYear - 2010 + 1)) + 2010
@@ -150,28 +138,23 @@ export const useRecommendations = () => {
           randomSeasons.push({ year: randomYear, season: randomSeason })
         }
         
-        // Fetch anime from each random season
         const seasonalResults = await Promise.all(
           randomSeasons.map(({ year, season }) => 
             getSeasonalAnime(user.access_token, year, season, 50).catch(() => [])
           )
         )
         
-        // Combine all results
         candidates = seasonalResults.flat()
       } else {
-        // For manga, use rankings since there's no seasonal manga API
         const ranking = await getMangaRanking(user.access_token, 'all', 100)
         candidates = ranking
       }
       
-      // FILTER 1: Only pick items with score >= 7
       let filtered = candidates.filter(item => {
         const score = item.node?.mean || 0
         return score >= 7
       })
       
-      // FILTER 2: Exclude OVA, ONA, special episodes (anime only)
       if (type === 'anime') {
         const allowedMediaTypes = ['tv', 'movie']
         filtered = filtered.filter(item => {
@@ -179,39 +162,32 @@ export const useRecommendations = () => {
           return allowedMediaTypes.includes(mediaType)
         })
       } else {
-        // For manga, allow manga, light_novel, one_shot
         const allowedMangaTypes = ['manga', 'light_novel', 'novel', 'one_shot', 'manhwa', 'doujinshi']
         filtered = filtered.filter(item => {
           const mediaType = item.node?.media_type?.toLowerCase() || ''
-          // If no media_type, include it (some manga may not have this field)
           return !mediaType || allowedMangaTypes.includes(mediaType)
         })
       }
       
-      // FILTER 3: Exclude donghua/manhua (anime only - Chinese animation)
       if (type === 'anime') {
         filtered = filtered.filter(item => {
           const genres = item.node?.genres || []
           const source = item.node?.source?.toLowerCase() || ''
           
-          // Check if any genre contains "donghua" or similar indicators
           const isDonghua = genres.some(g => 
             (g.name || g).toLowerCase().includes('donghua')
           )
           
-          // Check source for Chinese novel/manhua adaptations
           const isChineseSource = source.includes('chinese') || source.includes('manhua')
           
           return !isDonghua && !isChineseSource
         })
       }
       
-      // FILTER 4: Remove anime user has already watched/completed
       filtered = filtered.filter(item => 
         !userListIds.has(item.node.id)
       )
       
-      // FILTER 5: Apply genre filter if specified (match any selected genre)
       if (genreFilter && genreFilter.length > 0) {
         filtered = filtered.filter(item => 
           item.node.genres?.some(g => 
@@ -220,7 +196,7 @@ export const useRecommendations = () => {
         )
       }
       
-      // Remove duplicates (same anime might appear in multiple seasons)
+      // Remove duplicates
       const uniqueIds = new Set()
       filtered = filtered.filter(item => {
         if (uniqueIds.has(item.node.id)) return false
@@ -228,7 +204,7 @@ export const useRecommendations = () => {
         return true
       })
       
-      // RANDOMIZE: Shuffle all eligible anime and pick 5
+      // RANDOMIZE and pick 5 
       const shuffled = shuffleArray(filtered)
       const topRecommendations = shuffled.slice(0, 5).map(item => ({
         id: item.node.id,
@@ -249,7 +225,7 @@ export const useRecommendations = () => {
       
       setRecommendations(topRecommendations)
       
-      // Save cooldown (only if not in debug mode)
+      // Save cooldown
       saveCooldown(type, 'new', topRecommendations)
     } catch (e) {
       setError(e.message)
@@ -261,7 +237,7 @@ export const useRecommendations = () => {
   const getRewatchRecommendations = useCallback(async (type = 'anime', genreFilter = null) => {
     if (!user) return
     
-    // Check cooldown (skip in debug mode)
+    // Check cooldown
     const { canGenerate, cached, hoursRemaining } = checkCooldown(type, 'rewatch')
     if (!canGenerate && cached) {
       setRecommendations(cached)
@@ -275,35 +251,32 @@ export const useRecommendations = () => {
     setCooldownRemaining(null)
     
     try {
-      // Get user's list from cache
       const userList = type === 'anime' 
         ? await getUserAnimeListCache(user.id)
         : await getUserMangaListCache(user.id)
       
-      // Filter for completed/watched items with ratings
       const ratedItems = userList.filter(item => 
         item.score > 0 && 
         (item.status === 'completed' || item.status === 'watching' || item.status === 'reading')
       )
       
-      // Check if user has any ratings
+      // Check user ratings
       if (ratedItems.length === 0) {
         setNoRatings(true)
         setRecommendations([])
         return
       }
       
-      // Filter for items rated > 7 (exclude disliked items < 5-6)
+      // Filter for items rated > 7 
       let eligibleItems = ratedItems.filter(item => item.score >= 7)
       
-      // If no items >= 7, show message
       if (eligibleItems.length === 0) {
         setRecommendations([])
         setError('No items rated 7 or higher found. Rate more anime/manga to get rewatch recommendations!')
         return
       }
       
-      // Apply genre filter if specified (match any selected genre)
+      // Apply genre filter
       if (genreFilter && genreFilter.length > 0) {
         eligibleItems = eligibleItems.filter(item => 
           item.genres?.some(g => 
@@ -312,7 +285,7 @@ export const useRecommendations = () => {
         )
       }
       
-      // Shuffle and take up to 5 random recommendations
+      // Shuffle and pick 5 rec..
       const shuffled = shuffleArray(eligibleItems)
       const selected = shuffled.slice(0, 5).map(item => ({
         id: type === 'anime' ? item.mal_anime_id : item.mal_manga_id,
@@ -330,7 +303,6 @@ export const useRecommendations = () => {
       
       setRecommendations(selected)
       
-      // Save cooldown (only if not in debug mode)
       saveCooldown(type, 'rewatch', selected)
     } catch (e) {
       setError(e.message)
@@ -339,7 +311,6 @@ export const useRecommendations = () => {
     }
   }, [user, checkCooldown, saveCooldown])
 
-  // Load cached recommendations for a specific type/mode (used when switching tabs or on page load)
   const loadCachedRecommendations = useCallback((type, mode) => {
     if (!user) return { hasCached: false }
     
