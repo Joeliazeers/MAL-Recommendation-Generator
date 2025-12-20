@@ -7,7 +7,7 @@ const RecommendationCard = ({ item, type, onClick, isInUserList = false }) => {
   const node = item.node || item
   const listStatus = item.list_status
   
-  const [addStatus, setAddStatus] = useState(null) // null, 'loading', 'success', 'error'
+  const [addStatus, setAddStatus] = useState(null) 
   
   const imageUrl = node.main_picture?.medium || node.main_picture?.large || node.image_url || '/placeholder.png'
 
@@ -19,7 +19,7 @@ const RecommendationCard = ({ item, type, onClick, isInUserList = false }) => {
   }
 
   const handleAddToList = async (e) => {
-    e.stopPropagation() // Prevent card click
+    e.stopPropagation() 
     if (!user || addStatus === 'loading' || addStatus === 'success') return
     
     setAddStatus('loading')
@@ -37,7 +37,6 @@ const RecommendationCard = ({ item, type, onClick, isInUserList = false }) => {
     }
   }
 
-  // Don't show add button if already in user's list
   const showAddButton = user && !isInUserList && addStatus !== 'success'
 
   return (
