@@ -8,10 +8,9 @@ const Callback = () => {
   const navigate = useNavigate()
   const { handleCallback } = useAuth()
   const [error, setError] = useState(null)
-  const processedRef = useRef(false) // Guard against React Strict Mode double-execution
+  const processedRef = useRef(false)
 
   useEffect(() => {
-    // Prevent processing multiple times (React Strict Mode in dev runs effects twice)
     if (processedRef.current) return
     processedRef.current = true
     const processCallback = async () => {
