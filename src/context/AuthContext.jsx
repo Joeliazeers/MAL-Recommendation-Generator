@@ -17,8 +17,6 @@ import {
 
 const AuthContext = createContext(null)
 
-// Helper function to calculate manga statistics from list
-// MAL API doesn't provide manga_statistics field, so we calculate it ourselves
 const calculateMangaStatistics = (mangaList) => {
   const stats = {
     num_items_reading: 0,
@@ -80,7 +78,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Check for stored session on mount
   useEffect(() => {
     const storedUser = localStorage.getItem('mal_user')
     if (storedUser) {
@@ -90,7 +87,6 @@ export const AuthProvider = ({ children }) => {
         if (new Date(userData.token_expires_at) > new Date()) {
           setUser(userData)
         } else {
-          // Try to refresh token
           handleTokenRefresh(userData)
         }
       } catch (e) {
@@ -104,15 +100,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const tokens = await refreshAccessToken(userData.refresh_token)
       const updatedUser = { ...userData, ...tokens }
-      
-      // Update in Supabase
       await updateUserTokens(userData.mal_id, tokens)
-      
-      // Update local state
       setUser(updatedUser)
       localStorage.setItem('mal_user', JSON.stringify(updatedUser))
     } catch (e) {
-      // Refresh failed, user needs to re-login
       logout()
     }
   }
@@ -142,7 +133,7 @@ export const AuthProvider = ({ children }) => {
       })
       console.log('Full malUser response:', JSON.stringify(malUser, null, 2))
       
-      // Prepare user data - include all profile fields
+      // Prepare user data
       const userData = {
         mal_id: malUser.id,
         id: malUser.id,
@@ -181,7 +172,7 @@ export const AuthProvider = ({ children }) => {
         userData.animeListCount = animeList.length
         userData.mangaListCount = mangaList.length
         
-        // Calculate manga statistics from list (MAL API doesn't provide manga_statistics)
+        // Calculate manga statistics
         const mangaStats = calculateMangaStatistics(mangaList)
         userData.manga_statistics = mangaStats
         console.log('Calculated manga_statistics:', mangaStats)
@@ -189,7 +180,7 @@ export const AuthProvider = ({ children }) => {
         console.warn('Failed to cache lists:', cacheError)
       }
       
-      // Save to local storage and state
+      // Save to local storage
       localStorage.setItem('mal_user', JSON.stringify(userData))
       setUser(userData)
       
@@ -215,12 +206,10 @@ export const AuthProvider = ({ children }) => {
     
     setLoading(true)
     try {
-      // Check if token needs refresh
       if (new Date(user.token_expires_at) <= new Date()) {
         await handleTokenRefresh(user)
       }
       
-      // Refresh lists
       const [animeList, mangaList] = await Promise.all([
         getUserAnimeList(user.access_token),
         getUserMangaList(user.access_token)
