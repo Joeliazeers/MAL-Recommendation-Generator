@@ -2,7 +2,7 @@
 
 /* ===== DESIGN TOKENS ===== */
 :root {
-  /* Light Mode - Clean & Minimal */
+  /* Light Mode */
   --color-bg-primary: #ffffff;
   --color-bg-secondary: #f8f9fa;
   --color-bg-tertiary: #f0f1f3;
@@ -15,17 +15,14 @@
   --color-border: #e5e7eb;
   --color-border-hover: #d1d5db;
   
-  /* Accent - Electric Blue */
   --color-accent: #2563eb;
   --color-accent-hover: #1d4ed8;
   --color-accent-soft: rgba(37, 99, 235, 0.1);
   
-  /* Status Colors */
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   
-  /* Effects */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
@@ -38,7 +35,7 @@
   --radius-full: 9999px;
 }
 
-/* Dark Mode - Pure Black with White Accents */
+/* Dark Mode */
 .dark {
   --color-bg-primary: #000000;
   --color-bg-secondary: #0a0a0a;
@@ -52,7 +49,6 @@
   --color-border: #262626;
   --color-border-hover: #404040;
   
-  /* Accent - Pure White in Dark Mode */
   --color-accent: #ffffff;
   --color-accent-hover: #e4e4e7;
   --color-accent-soft: rgba(255, 255, 255, 0.08);
