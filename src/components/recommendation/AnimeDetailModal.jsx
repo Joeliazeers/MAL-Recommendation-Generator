@@ -15,7 +15,6 @@ const AnimeDetailModal = ({ anime, isOpen, onClose, type = 'anime' }) => {
       setLoading(true)
       setError(null)
       try {
-        // Use the correct API based on type
         const data = type === 'manga' 
           ? await getMangaDetails(user?.access_token, anime.id)
           : await getAnimeDetails(user?.access_token, anime.id)
@@ -30,7 +29,6 @@ const AnimeDetailModal = ({ anime, isOpen, onClose, type = 'anime' }) => {
     fetchDetails()
   }, [isOpen, anime?.id, user?.access_token, type])
 
-  // Close on ESC key
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape') onClose()
@@ -56,7 +54,7 @@ const AnimeDetailModal = ({ anime, isOpen, onClose, type = 'anime' }) => {
   // Extract year from start_date
   const year = node?.start_date?.split('-')[0] || node?.start_season?.year || '—'
   
-  // Format rating for display
+  // Age rating
   const formatRating = (rating) => {
     if (!rating) return null
     const ratingMap = {
@@ -70,13 +68,11 @@ const AnimeDetailModal = ({ anime, isOpen, onClose, type = 'anime' }) => {
     return ratingMap[rating] || rating.toUpperCase()
   }
 
-  // Get YouTube video ID from trailer
   const getTrailerUrl = () => {
     if (!details?.videos || details.videos.length === 0) return null
     const trailer = details.videos.find(v => v.url?.includes('youtube') || v.url?.includes('youtu.be'))
     if (!trailer?.url) return null
     
-    // Extract video ID from YouTube URL
     const match = trailer.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)
     return match ? match[1] : null
   }
