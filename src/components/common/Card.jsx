@@ -1,17 +1,17 @@
-const Card = ({ children, className = '', hover = true, onClick }) => {
+const Card = ({ children, className = "", hover = true, onClick }) => {
   return (
-    <div 
+    <div
       className={`
         card p-4
-        ${hover ? 'cursor-pointer' : ''}
-        ${!hover ? '!transform-none' : ''}
+        ${hover ? "cursor-pointer" : ""}
+        ${!hover ? "transform-none!" : ""} 
         ${className}
       `}
       onClick={onClick}
     >
       {children}
     </div>
-  )
-}
+  );
+};
 
-export default Card
+export default Card;
