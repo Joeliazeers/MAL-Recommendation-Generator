@@ -3,6 +3,18 @@ export const config = {
 }
 
 export default async function handler(request) {
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Authorization, X-MAL-CLIENT-ID, Content-Type',
+      },
+    })
+  }
+
   const url = new URL(request.url)
   
   // Get the path after /api/mal/v2
