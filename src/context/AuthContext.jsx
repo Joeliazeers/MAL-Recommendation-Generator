@@ -207,17 +207,23 @@ export const AuthProvider = ({ children }) => {
   const refreshUserData = async () => {
     if (!user) return
     
+    console.log('Starting sync with MAL...')
     setLoading(true)
     try {
       if (new Date(user.token_expires_at) <= new Date()) {
+        console.log('Token expired, refreshing...')
         await handleTokenRefresh(user)
       }
       
+      console.log('Fetching anime and manga lists...')
       const [animeList, mangaList] = await Promise.all([
         getUserAnimeList(user.access_token),
         getUserMangaList(user.access_token)
       ])
       
+      console.log(`Got ${animeList.length} anime, ${mangaList.length} manga`)
+      
+      console.log('Caching to Supabase...')
       await Promise.all([
         cacheUserAnimeList(user.id, animeList),
         cacheUserMangaList(user.id, mangaList)
@@ -231,8 +237,11 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem('mal_user', JSON.stringify(updatedUser))
       setUser(updatedUser)
+      console.log('Sync completed successfully!')
     } catch (e) {
+      console.error('Sync failed:', e)
       setError(e.message)
+      throw e // Re-throw so Profile.jsx can catch it
     } finally {
       setLoading(false)
     }

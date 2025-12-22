@@ -4,11 +4,19 @@ import { useAuth } from '../context/AuthContext'
 const Profile = () => {
   const { user, refreshUserData, loading } = useAuth()
   const [syncing, setSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState(null)
 
   const handleSync = async () => {
     setSyncing(true)
+    setSyncMessage(null)
     try {
       await refreshUserData()
+      setSyncMessage({ type: 'success', text: 'Successfully synced with MAL!' })
+      setTimeout(() => setSyncMessage(null), 3000)
+    } catch (error) {
+      console.error('Sync error:', error)
+      setSyncMessage({ type: 'error', text: `Sync failed: ${error.message}` })
+      setTimeout(() => setSyncMessage(null), 5000)
     } finally {
       setSyncing(false)
     }
@@ -90,6 +98,20 @@ const Profile = () => {
             )}
           </button>
         </div>
+
+        {/* Sync Message */}
+        {syncMessage && (
+          <div style={{ 
+            padding: '1rem', 
+            borderRadius: 'var(--radius-md)', 
+            marginBottom: '1rem',
+            background: syncMessage.type === 'success' ? 'var(--color-success-soft)' : 'var(--color-error-soft)',
+            color: syncMessage.type === 'success' ? 'var(--color-success)' : 'var(--color-error)',
+            textAlign: 'center'
+          }}>
+            {syncMessage.text}
+          </div>
+        )}
 
         {/* Anime Stats */}
         <h2 style={{ marginBottom: '1.5rem' }}>Anime Statistics</h2>
