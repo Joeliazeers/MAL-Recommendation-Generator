@@ -215,12 +215,14 @@ export const AuthProvider = ({ children }) => {
         await handleTokenRefresh(user)
       }
       
-      console.log('Fetching anime and manga lists...')
-      const [animeList, mangaList] = await Promise.all([
+      console.log('Fetching user info and lists from MAL...')
+      const [malUser, animeList, mangaList] = await Promise.all([
+        getUserInfo(user.access_token),
         getUserAnimeList(user.access_token),
         getUserMangaList(user.access_token)
       ])
       
+      console.log(`Got user info with statistics`)
       console.log(`Got ${animeList.length} anime, ${mangaList.length} manga`)
       
       console.log('Caching to Supabase...')
@@ -231,6 +233,14 @@ export const AuthProvider = ({ children }) => {
       
       const updatedUser = {
         ...user,
+        name: malUser.name,
+        username: malUser.name,
+        picture: malUser.picture,
+        avatar_url: malUser.picture,
+        gender: malUser.gender,
+        joined_at: malUser.joined_at,
+        anime_statistics: malUser.anime_statistics || {},
+        manga_statistics: malUser.manga_statistics || {},
         animeListCount: animeList.length,
         mangaListCount: mangaList.length
       }
@@ -238,6 +248,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('mal_user', JSON.stringify(updatedUser))
       setUser(updatedUser)
       console.log('Sync completed successfully!')
+      console.log('Updated anime_statistics:', malUser.anime_statistics)
+      console.log('Updated manga_statistics:', malUser.manga_statistics)
     } catch (e) {
       console.error('Sync failed:', e)
       setError(e.message)
