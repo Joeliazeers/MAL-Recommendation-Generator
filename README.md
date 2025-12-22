@@ -1,10 +1,14 @@
-# MAL Recommendation Generator
+# MAL Recommender
 
+<<<<<<< HEAD
 A highly personalized anime and manga recommendation system powered by **MyAnimeList** and **Supabase**. This application goes beyond simple suggestions by combining **content-based filtering** with **collaborative filtering** to provide accurate, tailored recommendations based on your unique watch history and preferences.
+=======
+A highly personalized anime and manga recommendation system powered by **MyAnimeList** and **Supabase**. This application goes beyond simple suggestions by combining **content-based filtering** with **collaborative filtering** (Hybrid Engine) to provide accurate, tailored recommendations based on your unique watch history and preferences.
+>>>>>>> da73606e6c6787fbd6ce25d91a39035f5d0ba611
 
 ## 🚀 Key Features
 
-### 🧠 Intelligent Recommendation Engine
+### 🧠 Recommendation Engine
 *   **Hybrid Algorithm:** Combines 70% Content-Based (genres, studios, authors) and 30% Collaborative Filtering (user similarity) for diverse and relevant results.
 *   **Preferences System:** Customize your feed by selecting favorite genres, excluding dislikes, and setting minimum score thresholds.
 *   **Smart Filtering:** Automatically excludes "Plan to Watch", "Dropped", and "Completed" entries to show you only fresh content.
