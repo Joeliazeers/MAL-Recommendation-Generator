@@ -10,25 +10,6 @@ A highly personalized anime and manga recommendation system powered by **MyAnime
 *   **Smart Filtering:** Automatically excludes "Plan to Watch", "Dropped", and "Completed" entries to show you only fresh content.
 *   **Similar User Matching:** Finds users with similar taste profiles (Jaccard similarity) to surface hidden gems.
 
-### ⚡ Performance & Experience
-*   **Instant Caching:** Recommendations are computed once and cached in Supabase for 12 hours, ensuring sub-100ms load times on subsequent visits.
-*   **Auto-Invalidation:** Changing preferences instantly regenerates recommendations.
-*   **Rich Metadata:** View detailed synopses, studio info, authors, and popularity rankings directly in the card.
-*   **Mobile Optimized:** Fully responsive design with touch-friendly interactions (min 44px targets).
-
-### 🛠 Production-Ready
-*   **Secure:** Row Level Security (RLS) protects user data.
-*   **Robust:** Error boundaries and graceful fallbacks for API limits.
-*   **Progressive:** Skeleton loaders and smooth UI transitions.
-
-## 🛠 Tech Stack
-
-*   **Frontend:** [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
-*   **Styling:** [Tailwind CSS](https://tailwindcss.com/) + CSS Modules
-*   **Database:** [Supabase](https://supabase.com/) (PostgreSQL)
-*   **Authentication:** MyAnimeList OAuth 2.0
-*   **Deployment:** Vercel
-
 ## 📦 Installation & Setup
 
 1.  **Clone the repository**
