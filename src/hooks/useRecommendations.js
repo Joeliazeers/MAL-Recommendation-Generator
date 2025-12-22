@@ -336,6 +336,13 @@ export const useRecommendations = () => {
         type
       }))
       
+      // Debug: Check if popularity field is present
+      console.log('🔍 Recommendations Debug:', topRecommendations.map(r => ({
+        title: r.title,
+        popularity: r.popularity,
+        mean: r.mean
+      })))
+      
       setRecommendations(topRecommendations)
       
       // Save to database cache
