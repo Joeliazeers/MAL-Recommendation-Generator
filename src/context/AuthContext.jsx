@@ -166,6 +166,33 @@ export const AuthProvider = ({ children }) => {
         ])
         console.log('Step 4a: Got lists', { anime: animeList.length, manga: mangaList.length })
         
+        // Calculate statistics from lists if not provided by MAL
+      let animeStatistics = malUser.anime_statistics
+      if (!animeStatistics || Object.keys(animeStatistics).length === 0) {
+        animeStatistics = {
+          num_items_watching: animeList.filter(a => a.list_status?.status === 'watching').length,
+          num_items_completed: animeList.filter(a => a.list_status?.status === 'completed').length,
+          num_items_on_hold: animeList.filter(a => a.list_status?.status === 'on_hold').length,
+          num_items_dropped: animeList.filter(a => a.list_status?.status === 'dropped').length,
+          num_items_plan_to_watch: animeList.filter(a => a.list_status?.status === 'plan_to_watch').length,
+          mean_score: animeList.filter(a => a.list_status?.score > 0).reduce((sum, a, _, arr) => sum + a.list_status.score / arr.length, 0)
+        }
+        console.log('Calculated anime_statistics:', animeStatistics)
+      }
+
+      let mangaStatistics = malUser.manga_statistics
+      if (!mangaStatistics || Object.keys(mangaStatistics).length === 0) {
+        mangaStatistics = {
+          num_items_reading: mangaList.filter(m => m.list_status?.status === 'reading').length,
+          num_items_completed: mangaList.filter(m => m.list_status?.status === 'completed').length,
+          num_items_on_hold: mangaList.filter(m => m.list_status?.status === 'on_hold').length,
+          num_items_dropped: mangaList.filter(m => m.list_status?.status === 'dropped').length,
+          num_items_plan_to_read: mangaList.filter(m => m.list_status?.status === 'plan_to_read').length,
+          mean_score: mangaList.filter(m => m.list_status?.score > 0).reduce((sum, m, _, arr) => sum + m.list_status.score / arr.length, 0)
+        }
+        console.log('Calculated manga_statistics:', mangaStatistics)
+      }
+        
         await Promise.all([
           cacheUserAnimeList(savedUser.id, animeList),
           cacheUserMangaList(savedUser.id, mangaList)
@@ -231,6 +258,25 @@ export const AuthProvider = ({ children }) => {
         cacheUserMangaList(user.id, mangaList)
       ])
       
+      // Calculate statistics from lists
+      const animeStats = {
+        num_items_watching: animeList.filter(a => a.list_status?.status === 'watching').length,
+        num_items_completed: animeList.filter(a => a.list_status?.status === 'completed').length,
+        num_items_on_hold: animeList.filter(a => a.list_status?.status === 'on_hold').length,
+        num_items_dropped: animeList.filter(a => a.list_status?.status === 'dropped').length,
+        num_items_plan_to_watch: animeList.filter(a => a.list_status?.status === 'plan_to_watch').length,
+        mean_score: animeList.filter(a => a.list_status?.score > 0).reduce((sum, a, _, arr) => sum + a.list_status.score / arr.length, 0) || 0
+      }
+      
+      const mangaStats = {
+        num_items_reading: mangaList.filter(m => m.list_status?.status === 'reading').length,
+        num_items_completed: mangaList.filter(m => m.list_status?.status === 'completed').length,
+        num_items_on_hold: mangaList.filter(m => m.list_status?.status === 'on_hold').length,
+        num_items_dropped: mangaList.filter(m => m.list_status?.status === 'dropped').length,
+        num_items_plan_to_read: mangaList.filter(m => m.list_status?.status === 'plan_to_read').length,
+        mean_score: mangaList.filter(m => m.list_status?.score > 0).reduce((sum, m, _, arr) => sum + m.list_status.score / arr.length, 0) || 0
+      }
+      
       const updatedUser = {
         ...user,
         name: malUser.name,
@@ -239,8 +285,8 @@ export const AuthProvider = ({ children }) => {
         avatar_url: malUser.picture,
         gender: malUser.gender,
         joined_at: malUser.joined_at,
-        anime_statistics: malUser.anime_statistics || {},
-        manga_statistics: malUser.manga_statistics || {},
+        anime_statistics: animeStats,
+        manga_statistics: mangaStats,
         animeListCount: animeList.length,
         mangaListCount: mangaList.length
       }
@@ -248,8 +294,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('mal_user', JSON.stringify(updatedUser))
       setUser(updatedUser)
       console.log('Sync completed successfully!')
-      console.log('Updated anime_statistics:', malUser.anime_statistics)
-      console.log('Updated manga_statistics:', malUser.manga_statistics)
+      console.log('Calculated anime_statistics:', animeStats)
+      console.log('Calculated manga_statistics:', mangaStats)
     } catch (e) {
       console.error('Sync failed:', e)
       setError(e.message)

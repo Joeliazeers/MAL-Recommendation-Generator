@@ -1,10 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 
 const Profile = () => {
-  const { user, refreshUserData, loading } = useAuth()
+  const { user, loading, refreshUserData } = useAuth()
   const [syncing, setSyncing] = useState(false)
   const [syncMessage, setSyncMessage] = useState(null)
+
+  // Auto-refresh stats if they're missing
+  useEffect(() => {
+    const checkAndRefreshStats = async () => {
+      if (user && (!user.manga_statistics || Object.keys(user.manga_statistics).length === 0)) {
+        console.log('Manga statistics missing, auto-refreshing...')
+        try {
+          await refreshUserData()
+        } catch (error) {
+          console.error('Failed to auto-refresh:', error)
+        }
+      }
+    }
+    
+    checkAndRefreshStats()
+  }, [user, refreshUserData])
 
   const handleSync = async () => {
     setSyncing(true)
@@ -38,6 +54,11 @@ const Profile = () => {
 
   const animeStats = user.anime_statistics || {}
   const mangaStats = user.manga_statistics || {}
+  
+  // Debug logging
+  console.log('User object:', user)
+  console.log('Manga statistics:', mangaStats)
+  console.log('Anime statistics:', animeStats)
 
   // Format joined date
   const formatDate = (dateString) => {
