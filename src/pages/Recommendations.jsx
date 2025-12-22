@@ -33,10 +33,15 @@ const Recommendations = () => {
     loadCachedRecommendations
   } = useRecommendations()
 
+  // Load cached recommendations when type/mode changes
   useEffect(() => {
     const { hasCached } = loadCachedRecommendations(type, mode)
-    setHasGenerated(hasCached)
-  }, [type, mode, loadCachedRecommendations])
+    // Sync local state with cached data
+    if (hasCached !== hasGenerated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHasGenerated(hasCached)
+    }
+  }, [type, mode, loadCachedRecommendations, hasGenerated])
 
   // Live countdown timer
   useEffect(() => {
@@ -59,7 +64,7 @@ const Recommendations = () => {
     return () => clearInterval(interval)
   }, [hasGenerated, hasGeneratedToday, getTimeUntilMidnight, formatCountdown, clearRecommendations])
 
-  const setType = (newType) => {
+  const _setType = (newType) => {
     setSearchParams({ type: newType, mode })
   }
 

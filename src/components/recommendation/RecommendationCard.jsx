@@ -5,7 +5,7 @@ import { addAnimeToList, addMangaToList } from '../../services/malApi'
 const RecommendationCard = ({ item, type, onClick, isInUserList = false }) => {
   const { user } = useAuth()
   const node = item.node || item
-  const listStatus = item.list_status
+  const _listStatus = item.list_status
   
   const [addStatus, setAddStatus] = useState(null) 
   

@@ -9,7 +9,6 @@ import {
 } from '../services/malApi'
 import { 
   upsertUser, 
-  getUserByMalId, 
   updateUserTokens,
   cacheUserAnimeList,
   cacheUserMangaList
@@ -65,6 +64,7 @@ const calculateMangaStatistics = (mangaList) => {
   return stats
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext)
   if (!context) {
@@ -89,11 +89,12 @@ export const AuthProvider = ({ children }) => {
         } else {
           handleTokenRefresh(userData)
         }
-      } catch (e) {
+      } catch {
         localStorage.removeItem('mal_user')
       }
     }
     setLoading(false)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleTokenRefresh = async (userData) => {
@@ -103,7 +104,7 @@ export const AuthProvider = ({ children }) => {
       await updateUserTokens(userData.mal_id, tokens)
       setUser(updatedUser)
       localStorage.setItem('mal_user', JSON.stringify(updatedUser))
-    } catch (e) {
+    } catch {
       logout()
     }
   }

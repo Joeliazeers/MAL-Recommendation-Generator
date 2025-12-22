@@ -16,7 +16,7 @@ const SharedView = () => {
       try {
         const data = await getSharedRecommendation(code)
         setShared(data)
-      } catch (err) {
+      } catch {
         setError('This shared link is invalid or has expired.')
       } finally {
         setLoading(false)

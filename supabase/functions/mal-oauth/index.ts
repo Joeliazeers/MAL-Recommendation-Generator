@@ -1,16 +1,28 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 
 const MAL_TOKEN_URL = "https://myanimelist.net/v1/oauth2/token"
 
+// CORS: Use environment variable for production, fallback to '*' for development
+const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN') || '*'
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': allowedOrigin,
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
+  }
+
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 
   try {
@@ -21,7 +33,28 @@ serve(async (req) => {
     const clientSecret = Deno.env.get('MAL_CLIENT_SECRET')
 
     if (!clientId || !clientSecret) {
-      throw new Error('MAL credentials not configured')
+      return new Response(
+        JSON.stringify({ error: 'MAL credentials not configured on server' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Validate required parameters based on grant type
+    if (grant_type === 'refresh_token') {
+      if (!refresh_token) {
+        return new Response(
+          JSON.stringify({ error: 'Missing required parameter: refresh_token' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    } else {
+      // authorization_code flow
+      if (!code || !code_verifier || !redirect_uri) {
+        return new Response(
+          JSON.stringify({ error: 'Missing required parameters: code, code_verifier, or redirect_uri' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
     // Build the request body based on grant type
@@ -75,8 +108,9 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Edge function error:', error)
+    const message = error instanceof Error ? error.message : 'Unknown error'
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

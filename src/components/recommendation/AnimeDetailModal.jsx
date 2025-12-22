@@ -6,7 +6,7 @@ const AnimeDetailModal = ({ anime, isOpen, onClose, type = 'anime' }) => {
   const { user } = useAuth()
   const [details, setDetails] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [_error, setError] = useState(null)
 
   useEffect(() => {
     if (!isOpen || !anime?.id) return

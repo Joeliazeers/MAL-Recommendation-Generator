@@ -1,16 +1,9 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
 
 const Profile = () => {
-  const { user, logout, refreshUserData, loading } = useAuth()
-  const navigate = useNavigate()
+  const { user, refreshUserData, loading } = useAuth()
   const [syncing, setSyncing] = useState(false)
-
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
 
   const handleSync = async () => {
     setSyncing(true)

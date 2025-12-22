@@ -1,9 +1,7 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { 
-  getAnimeRanking, 
   getMangaRanking, 
-  getAnimeSuggestions,
   getSeasonalAnime
 } from '../services/malApi'
 import { 
@@ -314,7 +312,7 @@ export const useRecommendations = () => {
   const loadCachedRecommendations = useCallback((type, mode) => {
     if (!user) return { hasCached: false }
     
-    const { canGenerate, cached, isOnCooldown } = checkCooldown(type, mode)
+    const { canGenerate, cached, isOnCooldown: _isOnCooldown } = checkCooldown(type, mode)
     
     if (!canGenerate && cached) {
       setRecommendations(cached)
