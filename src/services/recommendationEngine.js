@@ -27,56 +27,22 @@ const calculateUserSimilarity = (userALikes, userBLikes) => {
  */
 export const findSimilarUsers = async (userId, itemType = 'anime', minSimilarity = 0.2) => {
   try {
-    // Get current user's likes
-    const { data: userFeedback, error: userError } = await supabase
-      .from('user_feedback')
-      .select('anime_id, manga_id')
-      .eq('user_id', userId)
-      .eq('feedback_type', 'like')
-    
-    if (userError) throw userError
-    
-    const userLikes = userFeedback
-      .map(f => itemType === 'anime' ? f.anime_id : f.manga_id)
-      .filter(Boolean)
-    
-    if (userLikes.length === 0) {
-      return [] // No likes yet, can't find similar users
-    }
-    
-    // Get all other users' likes
-    const { data: allFeedback, error: allError } = await supabase
-      .from('user_feedback')
-      .select('user_id, anime_id, manga_id')
-      .neq('user_id', userId)
-      .eq('feedback_type', 'like')
-    
-    if (allError) throw allError
-    
-    // Group likes by user
-    const userLikesMap = {}
-    allFeedback.forEach(f => {
-      const itemId = itemType === 'anime' ? f.anime_id : f.manga_id
-      if (!itemId) return
-      
-      if (!userLikesMap[f.user_id]) {
-        userLikesMap[f.user_id] = []
-      }
-      userLikesMap[f.user_id].push(itemId)
+    // Use server-side RPC function for better performance
+    const { data, error } = await supabase.rpc('match_similar_users', {
+      target_user_id: userId,
+      item_type: itemType,
+      min_similarity: minSimilarity,
+      limit_count: 10
     })
     
-    // Calculate similarity with each user
-    const similarities = Object.entries(userLikesMap).map(([otherUserId, otherLikes]) => ({
-      userId: otherUserId,
-      similarity: calculateUserSimilarity(userLikes, otherLikes),
-      sharedLikes: [...new Set(userLikes)].filter(x => otherLikes.includes(x)).length
-    }))
+    if (error) throw error
     
-    // Filter and sort by similarity
-    return similarities
-      .filter(s => s.similarity >= minSimilarity)
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 10) // Top 10 similar users
+    // Transform to match expected format
+    return (data || []).map(row => ({
+      userId: row.user_id,
+      similarity: row.similarity,
+      sharedLikes: row.shared_likes
+    }))
     
   } catch (error) {
     console.error('Error finding similar users:', error)
@@ -99,70 +65,23 @@ export const getCollaborativeRecommendations = async (
   limit = 10
 ) => {
   try {
-    // Find similar users
-    const similarUsers = await findSimilarUsers(userId, itemType, 0.2)
-    
-    if (similarUsers.length === 0) {
-      return [] // No similar users found
-    }
-    
-    // Get items liked by similar users
-    const similarUserIds = similarUsers.map(u => u.userId)
-    
-    const { data: recommendations, error } = await supabase
-      .from('user_feedback')
-      .select('anime_id, manga_id, user_id')
-      .in('user_id', similarUserIds)
-      .eq('feedback_type', 'like')
+    // Use optimized server-side RPC function
+    const { data, error } = await supabase.rpc('get_collaborative_recommendations', {
+      target_user_id: userId,
+      item_type: itemType,
+      user_list_ids: userListIds,
+      limit_count: limit
+    })
     
     if (error) throw error
     
-    // Get current user's dislikes to exclude
-    const { data: userDislikes } = await supabase
-      .from('user_feedback')
-      .select('anime_id, manga_id')
-      .eq('user_id', userId)
-      .eq('feedback_type', 'dislike')
-    
-    const dislikedIds = new Set(
-      (userDislikes || [])
-        .map(f => itemType === 'anime' ? f.anime_id : f.manga_id)
-        .filter(Boolean)
-    )
-    
-    // Score items based on how many similar users liked them
-    const itemScores = {}
-    const userSimilarityMap = {}
-    similarUsers.forEach(u => {
-      userSimilarityMap[u.userId] = u.similarity
-    })
-    
-    recommendations.forEach(rec => {
-      const itemId = itemType === 'anime' ? rec.anime_id : rec.manga_id
-      if (!itemId) return
-      
-      // Skip items in user's list or disliked
-      if (userListIds.includes(itemId) || dislikedIds.has(itemId)) return
-      
-      const similarity = userSimilarityMap[rec.user_id] || 0
-      if (!itemScores[itemId]) {
-        itemScores[itemId] = { score: 0, count: 0 }
-      }
-      itemScores[itemId].score += similarity
-      itemScores[itemId].count += 1
-    })
-    
-    // Convert to array and sort by score
-    const scoredItems = Object.entries(itemScores).map(([itemId, data]) => ({
-      itemId: parseInt(itemId),
-      score: data.score,
-      count: data.count,
-      avgSimilarity: data.score / data.count
+    // Transform to match expected format
+    return (data || []).map(row => ({
+      itemId: row.item_id,
+      score: row.score,
+      count: row.liked_by_count,
+      avgSimilarity: row.score / row.liked_by_count
     }))
-    
-    return scoredItems
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
     
   } catch (error) {
     console.error('Error getting collaborative recommendations:', error)
