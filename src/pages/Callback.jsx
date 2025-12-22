@@ -72,10 +72,10 @@ const Callback = () => {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
+          <h1 className="text-2xl font-bold text-(--color-text-primary) mb-2">
             Authentication Failed
           </h1>
-          <p className="text-[var(--color-text-secondary)] mb-6">{error}</p>
+          <p className="text-(--color-text-secondary) mb-6">{error}</p>
           <button onClick={() => navigate("/")} className="btn-primary">
             Back to Home
           </button>
