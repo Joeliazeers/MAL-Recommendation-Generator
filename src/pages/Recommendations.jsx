@@ -25,11 +25,10 @@ const Recommendations = () => {
     noRatings,
     cooldownRemaining,
     hasGeneratedToday,
-    getTimeUntilMidnight,
+    getTimeUntilReset,
     formatCountdown,
     getNewRecommendations,
     getRewatchRecommendations,
-    clearRecommendations,
     loadCachedRecommendations
   } = useRecommendations()
 
@@ -43,18 +42,18 @@ const Recommendations = () => {
     }
   }, [type, mode, loadCachedRecommendations, hasGenerated])
 
-  // Live countdown timer
+  // Live countdown timer with auto-refresh on reset
   useEffect(() => {
     if (!hasGenerated && !hasGeneratedToday) return
 
     const updateCountdown = () => {
-      const ms = getTimeUntilMidnight()
+      const ms = getTimeUntilReset()
       const formatted = formatCountdown(ms)
       setCountdown(formatted)
       
       if (!formatted) {
-        setHasGenerated(false)
-        clearRecommendations()
+        // Time's up - refresh the page to reset cooldown
+        window.location.reload()
       }
     }
 
@@ -62,7 +61,7 @@ const Recommendations = () => {
     const interval = setInterval(updateCountdown, 1000)
 
     return () => clearInterval(interval)
-  }, [hasGenerated, hasGeneratedToday, getTimeUntilMidnight, formatCountdown, clearRecommendations])
+  }, [hasGenerated, hasGeneratedToday, getTimeUntilReset, formatCountdown])
 
   const _setType = (newType) => {
     setSearchParams({ type: newType, mode })

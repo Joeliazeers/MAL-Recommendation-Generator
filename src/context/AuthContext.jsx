@@ -89,7 +89,8 @@ export const AuthProvider = ({ children }) => {
         } else {
           handleTokenRefresh(userData)
         }
-      } catch {
+      } catch (e) {
+        console.warn('Failed to parse stored user:', e)
         localStorage.removeItem('mal_user')
       }
     }
@@ -104,7 +105,8 @@ export const AuthProvider = ({ children }) => {
       await updateUserTokens(userData.mal_id, tokens)
       setUser(updatedUser)
       localStorage.setItem('mal_user', JSON.stringify(updatedUser))
-    } catch {
+    } catch (e) {
+      console.warn('Failed to refresh token:', e)
       logout()
     }
   }

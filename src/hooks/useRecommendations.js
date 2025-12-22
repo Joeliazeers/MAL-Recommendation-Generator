@@ -22,17 +22,26 @@ const shuffleArray = (array) => {
   return shuffled
 }
 
-// Time reset
-const getNextMidnight = () => {
+// Time reset - resets at 00:00 AM and 12:00 PM
+const getNextResetTime = () => {
   const now = new Date()
-  const midnight = new Date(now)
-  midnight.setHours(24, 0, 0, 0)
-  return midnight
+  const currentHour = now.getHours()
+  const nextReset = new Date(now)
+  
+  if (currentHour < 12) {
+    // Next reset is 12:00 PM today
+    nextReset.setHours(12, 0, 0, 0)
+  } else {
+    // Next reset is 00:00 AM tomorrow
+    nextReset.setHours(24, 0, 0, 0)
+  }
+  
+  return nextReset
 }
 
-// Calculate remaining time
-const getTimeUntilMidnight = () => {
-  return getNextMidnight().getTime() - Date.now()
+// Calculate remaining time until next reset
+const getTimeUntilReset = () => {
+  return getNextResetTime().getTime() - Date.now()
 }
 const formatCountdown = (ms) => {
   if (ms <= 0) return null
@@ -89,9 +98,9 @@ export const useRecommendations = () => {
     const cooldownKey = getCooldownKey(user.id, type, mode)
     const recsKey = getRecsKey(user.id, type, mode)
     
-    // Set cooldown to expire at next midnight
-    const midnight = getNextMidnight()
-    localStorage.setItem(cooldownKey, midnight.toISOString())
+    // Set cooldown to expire at next reset time (00:00 or 12:00)
+    const nextReset = getNextResetTime()
+    localStorage.setItem(cooldownKey, nextReset.toISOString())
     localStorage.setItem(recsKey, JSON.stringify(recs))
     setHasGeneratedToday(true)
   }, [user])
@@ -100,10 +109,9 @@ export const useRecommendations = () => {
     if (!user) return
     
     // Check cooldown (skip in debug mode)
-    const { canGenerate, cached, hoursRemaining } = checkCooldown(type, 'new')
+    const { canGenerate, cached } = checkCooldown(type, 'new')
     if (!canGenerate && cached) {
       setRecommendations(cached)
-      setCooldownRemaining(hoursRemaining)
       return
     }
     
@@ -236,10 +244,9 @@ export const useRecommendations = () => {
     if (!user) return
     
     // Check cooldown
-    const { canGenerate, cached, hoursRemaining } = checkCooldown(type, 'rewatch')
+    const { canGenerate, cached } = checkCooldown(type, 'rewatch')
     if (!canGenerate && cached) {
       setRecommendations(cached)
-      setCooldownRemaining(hoursRemaining)
       return
     }
     
@@ -312,7 +319,7 @@ export const useRecommendations = () => {
   const loadCachedRecommendations = useCallback((type, mode) => {
     if (!user) return { hasCached: false }
     
-    const { canGenerate, cached, isOnCooldown: _isOnCooldown } = checkCooldown(type, mode)
+    const { canGenerate, cached } = checkCooldown(type, mode)
     
     if (!canGenerate && cached) {
       setRecommendations(cached)
@@ -341,7 +348,7 @@ export const useRecommendations = () => {
     noRatings,
     cooldownRemaining,
     hasGeneratedToday,
-    getTimeUntilMidnight,
+    getTimeUntilReset,
     formatCountdown,
     getNewRecommendations,
     getRewatchRecommendations,
