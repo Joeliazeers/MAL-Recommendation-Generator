@@ -95,8 +95,9 @@ const RecommendationCard = ({ item, type, onClick, isInUserList = false }) => {
                 alignItems: 'center',
                 gap: '0.25rem'
               }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" opacity="0.3"/>
+                  <path d="M12 6L10.5 10H6L9.5 12.5L8 17L12 14L16 17L14.5 12.5L18 10H13.5L12 6Z"/>
                 </svg>
                 #{node.popularity || node.rank}
               </span>
