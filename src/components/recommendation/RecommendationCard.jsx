@@ -9,12 +9,9 @@ const RecommendationCard = ({ item, type, onClick, isInUserList = false }) => {
   const _listStatus = item.list_status
   
   const [addStatus, setAddStatus] = useState(null)
-  const [showFullSynopsis, setShowFullSynopsis] = useState(false)
   const [feedback, setFeedback] = useState(null) // 'like' or 'dislike'
   
   const imageUrl = node.main_picture?.medium || node.main_picture?.large || node.image_url || '/placeholder.png'
-  const synopsis = node.synopsis || ''
-  const shortSynopsis = synopsis.length > 150 ? synopsis.substring(0, 150) + '...' : synopsis
 
   const handleClick = (e) => {
     e.preventDefault()
@@ -59,11 +56,6 @@ const RecommendationCard = ({ item, type, onClick, isInUserList = false }) => {
   }
 
   const showAddButton = user && !isInUserList && addStatus !== 'success'
-  
-  // Get studio or author names
-  const creators = type === 'manga' 
-    ? (node.authors || []).map(a => a.node?.first_name + ' ' + a.node?.last_name).filter(Boolean)
-    : (node.studios || []).map(s => s.name).filter(Boolean)
 
   return (
     <div 
@@ -82,50 +74,6 @@ const RecommendationCard = ({ item, type, onClick, isInUserList = false }) => {
       
       <div className="rec-info">
         <h3 className="rec-title">{node.title}</h3>
-        
-        {/* Synopsis */}
-        {synopsis && (
-          <div style={{ 
-            fontSize: '0.8rem', 
-            color: 'var(--color-text-secondary)', 
-            marginTop: '0.5rem',
-            marginBottom: '0.75rem',
-            lineHeight: 1.5
-          }}>
-            {showFullSynopsis ? synopsis : shortSynopsis}
-            {synopsis.length > 150 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowFullSynopsis(!showFullSynopsis)
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--color-accent)',
-                  cursor: 'pointer',
-                  padding: 0,
-                  marginLeft: '0.25rem',
-                  fontSize: '0.8rem',
-                  textDecoration: 'underline'
-                }}
-              >
-                {showFullSynopsis ? 'Show less' : 'Read more'}
-              </button>
-            )}
-          </div>
-        )}
-        
-        {/* Creators (Studios/Authors) */}
-        {creators.length > 0 && (
-          <div style={{
-            fontSize: '0.75rem',
-            color: 'var(--color-text-muted)',
-            marginBottom: '0.5rem'
-          }}>
-            {type === 'manga' ? '✍️ ' : '🎬 '}{creators.slice(0, 2).join(', ')}
-          </div>
-        )}
         
         <div className="rec-bottom">
           <div className="rec-meta" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
