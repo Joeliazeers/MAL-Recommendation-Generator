@@ -4,7 +4,7 @@ A highly personalized anime and manga recommendation system powered by **MyAnime
 
 ## 🚀 Key Features
 
-### 🧠 Intelligent Recommendation Engine
+### 🧠 Recommendation Engine
 *   **Hybrid Algorithm:** Combines 70% Content-Based (genres, studios, authors) and 30% Collaborative Filtering (user similarity) for diverse and relevant results.
 *   **Preferences System:** Customize your feed by selecting favorite genres, excluding dislikes, and setting minimum score thresholds.
 *   **Smart Filtering:** Automatically excludes "Plan to Watch", "Dropped", and "Completed" entries to show you only fresh content.
