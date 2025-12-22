@@ -1,11 +1,10 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import RecommendationList from '../components/recommendation/RecommendationList'
-import GenreFilter from '../components/recommendation/GenreFilter'
-import { ANIME_GENRES, MANGA_GENRES } from '../services/malApi'
 import { createSharedRecommendation } from '../services/supabase'
 import { useAuth } from '../context/AuthContext'
 import useRecommendations from '../hooks/useRecommendations'
+
 
 const Recommendations = () => {
   const { user } = useAuth()
@@ -13,7 +12,6 @@ const Recommendations = () => {
   
   const type = searchParams.get('type') || 'anime'
   const mode = searchParams.get('mode') || 'new'
-  const [genreFilter, setGenreFilter] = useState([])
   const [hasGenerated, setHasGenerated] = useState(false)
   const [countdown, setCountdown] = useState(null)
   const [shareStatus, setShareStatus] = useState(null) 
@@ -71,19 +69,14 @@ const Recommendations = () => {
     setSearchParams({ type, mode: newMode })
   }
 
-  const handleGenreChange = (genres) => {
-    setGenreFilter(genres)
-  }
-
-  const handleGenerate = useCallback((overrideGenre = undefined) => {
-    const filterToUse = overrideGenre !== undefined ? overrideGenre : genreFilter
+  const handleGenerate = useCallback(() => {
     setHasGenerated(true)
     if (mode === 'new') {
-      getNewRecommendations(type, filterToUse)
+      getNewRecommendations(type)
     } else {
-      getRewatchRecommendations(type, filterToUse)
+      getRewatchRecommendations(type)
     }
-  }, [mode, type, genreFilter, getNewRecommendations, getRewatchRecommendations])
+  }, [mode, type, getNewRecommendations, getRewatchRecommendations])
 
   const handleShare = async () => {
     if (!user || recommendations.length === 0 || shareStatus === 'loading') return
@@ -117,7 +110,6 @@ const Recommendations = () => {
     }
   }
 
-  const genres = type === 'anime' ? ANIME_GENRES : MANGA_GENRES
   const showButton = !hasGenerated && !hasGeneratedToday && !cooldownRemaining
   const showCountdown = hasGenerated || hasGeneratedToday || cooldownRemaining
 
@@ -154,17 +146,6 @@ const Recommendations = () => {
               {type === 'anime' ? 'Rewatch' : 'Reread'}
             </button>
           </div>
-
-          {/* Genre Filter */}
-          {mode === 'new' && showButton && (
-            <div style={{ maxWidth: '300px', margin: '0 auto', width: '100%' }}>
-              <GenreFilter 
-                genres={genres}
-                selectedGenres={genreFilter}
-                onSelect={handleGenreChange}
-              />
-            </div>
-          )}
 
           {/* Generate Button */}
           {showButton && (

@@ -59,6 +59,101 @@
   --shadow-glow: 0 0 30px rgba(255, 255, 255, 0.05);
 }
 
+/* ===== GENRE BUTTON STYLES (PREFERENCES PAGE) ===== */
+.genre-button {
+  padding: 0.5rem 1rem !important;
+  border-radius: 9999px !important;
+  border: 2px solid !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  font-family: inherit !important;
+}
+
+.genre-button:not(.selected):not(.excluded) {
+  border-color: var(--color-border) !important;
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.genre-button.selected {
+  border-color: #000000 !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.genre-button.excluded {
+  border-color: #000000 !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.genre-button:hover:not(.selected):not(.excluded) {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--color-text-secondary) !important;
+}
+
+.genre-button:active,
+.genre-button:focus {
+  outline: none !important;
+}
+
+.genre-button:active:not(.selected):not(.excluded),
+.genre-button:focus:not(.selected):not(.excluded) {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.genre-button.selected:active,
+.genre-button.selected:focus {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+.genre-button.excluded:active,
+.genre-button.excluded:focus {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* Light Mode - Invert selected button colors */
+:root .genre-button.selected,
+:root .genre-button.excluded {
+  border-color: #ffffff !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+:root .genre-button.selected:active,
+:root .genre-button.selected:focus,
+:root .genre-button.excluded:active,
+:root .genre-button.excluded:focus {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+/* Dark Mode - Keep white background with black text */
+.dark .genre-button.selected,
+.dark .genre-button.excluded {
+  border-color: #000000 !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.dark .genre-button.selected:active,
+.dark .genre-button.selected:focus,
+.dark .genre-button.excluded:active,
+.dark .genre-button.excluded:focus {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
 /* ===== BASE STYLES ===== */
 * {
   box-sizing: border-box;

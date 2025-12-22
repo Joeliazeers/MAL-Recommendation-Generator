@@ -147,7 +147,8 @@ export const getUserAnimeList = async (accessToken, status = null, limit = 1000)
   
   while (offset < limit) {
     const params = {
-      fields: 'list_status,id,title,main_picture,genres,mean,status,num_episodes,media_type',
+      // Extended fields for enhanced recommendations
+      fields: 'list_status,id,title,main_picture,genres,mean,status,num_episodes,media_type,synopsis,studios,start_season,popularity,num_scoring_users',
       limit: Math.min(batchSize, limit - offset),
       offset,
       sort: 'list_updated_at'
@@ -168,7 +169,8 @@ export const getAnimeRanking = async (accessToken, type = 'all', limit = 100) =>
   const data = await apiRequest('/anime/ranking', accessToken, {
     ranking_type: type,
     limit,
-    fields: 'id,title,main_picture,genres,mean,status,num_episodes,media_type'
+    // Extended fields
+    fields: 'id,title,main_picture,genres,mean,status,num_episodes,media_type,synopsis,studios,start_season,popularity,num_scoring_users'
   })
   return data.data || []
 }
@@ -176,7 +178,8 @@ export const getAnimeRanking = async (accessToken, type = 'all', limit = 100) =>
 export const getAnimeSuggestions = async (accessToken, limit = 100) => {
   const data = await apiRequest('/anime/suggestions', accessToken, {
     limit,
-    fields: 'id,title,main_picture,genres,mean,status,num_episodes,media_type'
+    // Extended fields
+    fields: 'id,title,main_picture,genres,mean,status,num_episodes,media_type,synopsis,studios,start_season,popularity,num_scoring_users'
   })
   return data.data || []
 }
@@ -184,7 +187,8 @@ export const getAnimeSuggestions = async (accessToken, limit = 100) => {
 export const getSeasonalAnime = async (accessToken, year, season, limit = 100) => {
   const data = await apiRequest(`/anime/season/${year}/${season}`, accessToken, {
     limit,
-    fields: 'id,title,main_picture,genres,mean,status,num_episodes,media_type'
+    // Extended fields
+    fields: 'id,title,main_picture,genres,mean,status,num_episodes,media_type,synopsis,studios,start_season,popularity,num_scoring_users'
   })
   return data.data || []
 }
@@ -264,7 +268,8 @@ export const getUserMangaList = async (accessToken, status = null, limit = 1000)
   
   while (offset < limit) {
     const params = {
-      fields: 'list_status,id,title,main_picture,genres,mean,status,num_chapters,num_volumes,media_type',
+      // Extended fields for enhanced recommendations
+      fields: 'list_status,id,title,main_picture,genres,mean,status,num_chapters,num_volumes,media_type,synopsis,authors,popularity,num_scoring_users',
       limit: Math.min(batchSize, limit - offset),
       offset,
       sort: 'list_updated_at'
@@ -285,7 +290,8 @@ export const getMangaRanking = async (accessToken, type = 'all', limit = 100) =>
   const data = await apiRequest('/manga/ranking', accessToken, {
     ranking_type: type,
     limit,
-    fields: 'id,title,main_picture,genres,mean,status,num_chapters,num_volumes,media_type'
+    // Extended fields
+    fields: 'id,title,main_picture,genres,mean,status,num_chapters,num_volumes,media_type,synopsis,authors,popularity,num_scoring_users'
   })
   return data.data || []
 }

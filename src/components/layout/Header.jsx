@@ -49,6 +49,12 @@ const Header = () => {
               >
                 Profile
               </Link>
+              <Link 
+                to="/preferences" 
+                className={`nav-link ${isActive('/preferences') ? 'active' : ''}`}
+              >
+                Preferences
+              </Link>
             </>
           )}
           
@@ -115,6 +121,13 @@ const Header = () => {
             onClick={closeMenu}
           >
             Profile
+          </Link>
+          <Link 
+            to="/preferences" 
+            className={`mobile-nav-link ${isActive('/preferences') ? 'active' : ''}`}
+            onClick={closeMenu}
+          >
+            Preferences
           </Link>
           <button 
             onClick={() => { logout(); closeMenu(); }} 

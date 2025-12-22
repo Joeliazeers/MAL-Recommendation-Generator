@@ -1,30 +1,35 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
+import ErrorBoundary from './components/ErrorBoundary'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
 import Callback from './pages/Callback'
-import Recommendations from './pages/Recommendations'
 import Profile from './pages/Profile'
+import Recommendations from './pages/Recommendations'
 import SharedView from './pages/SharedView'
+import Preferences from './pages/Preferences'
 
 function App() {
   return (
-    <BrowserRouter>
+    <ErrorBoundary>
       <ThemeProvider>
         <AuthProvider>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/callback" element={<Callback />} />
-              <Route path="/recommendations" element={<Recommendations />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/share/:code" element={<SharedView />} />
-            </Routes>
-          </Layout>
+          <Router>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/callback" element={<Callback />} />
+                <Route path="/recommendations" element={<Recommendations />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/preferences" element={<Preferences />} />
+                <Route path="/share/:shareCode" element={<SharedView />} />
+              </Routes>
+            </Layout>
+          </Router>
         </AuthProvider>
       </ThemeProvider>
-    </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 
